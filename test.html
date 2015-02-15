@@ -10,14 +10,14 @@
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 
+  <link rel="stylesheet" href="css/main.css">
+  <script src="bower_components/underscore/underscore.js"></script>
+  <script src="bower_components/jquery/dist/jquery.min.js"></script>
+  <script src="bower_components/backbone/backbone.js"></script>
+  <script src="js/localStorage.js"></script>
 
 </head>
 <body>
-        <!--[if lt IE 7]>
-            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
-            <![endif]-->
-
-            <!-- <div id="container">Loading...</div> -->
 
             <section id="todoapp">
             	<header id="header">
@@ -27,33 +27,35 @@
             	<section id="main">
             		<ul id="todo-list"></ul>
             	</section>
-            </section>        
-
-            <link rel="stylesheet" href="css/main.css">
-            <script src="bower_components/underscore/underscore.js"></script>
-            <script src="bower_components/jquery/dist/jquery.min.js"></script>
-            <script src="bower_components/backbone/backbone.js"></script>
-            <script src="js/localStorage.js"></script>
+            </section>
 
             <script type="text/template" id="item-template">
               <div class="view">
-                <input class="toggle" id='<%- title %>' type="checkbox">
-                <label for='<%- title %>'><%- title %></label>
+                <input class="toggle" id='<%- id %>' type="checkbox">
+                <label for='<%- id %>'><%- title %></label>
               </div>
             </script>   
 
             <script>
 
+            // Backbone : Model, Collection, View, Event
+
+            // Backbone.Model.extend({});
+            // Backbone.Collection.extend({});
+            // Backbone.View.extend({});
+            // Backbone.Event
+
+
         	// Sample A - Model
         	// ---------------------------------
-			var app = {}; // create namespace for our app
+         var app = {};
 
-			app.Todo = Backbone.Model.extend({
-				defaults: {
-					title: '',
-					completed: false
-				}
-			});
+         app.Todo = Backbone.Model.extend({
+          defaults: {
+           title: '',
+           completed: false
+         }
+       });
 
 
         	// Sample B - Collection
@@ -69,45 +71,49 @@
             // Sample C - View
             // ---------------------------------
             app.TodoView = Backbone.View.extend({
-                tagName: 'li',
-                template: _.template($('#item-template').html()),
-                render: function(){
-                    this.$el.html(this.template(this.model.toJSON()));
-                    return this; // enable chained calls
-                }
+              tagName: 'li',
+              template: _.template($('#item-template').html()),
+              render: function(){
+                this.$el.html(this.template(this.model.toJSON()));
+                return this;
+              }
             });
-
 
             // Sample D - Event
             // ---------------------------------
-            // renders the full list of todo items calling TodoView for each one.
+
             app.AppView = Backbone.View.extend({
               el: '#todoapp',
               initialize: function () {
                 this.input = this.$('#new-todo');
-                // when new elements are added to the collection render then with addOne
+                
                 app.todoList.on('add', this.addOne, this);
                 app.todoList.on('reset', this.addAll, this);
-                app.todoList.fetch(); // Loads list from local storage
+                app.todoList.fetch();
               },
+
               events: {
                 'keypress #new-todo': 'createTodoOnEnter'
               },
+
               createTodoOnEnter: function(e){
-                if ( e.which !== 13 || !this.input.val().trim() ) { // ENTER_KEY = 13
+                if ( e.which !== 13 || !this.input.val().trim() ) {
                   return;
                 }
                 app.todoList.create(this.newAttributes());
-                this.input.val(''); // clean input box
+                this.input.val('');
               },
+
               addOne: function(todo){
                 var view = new app.TodoView({model: todo});
                 $('#todo-list').append(view.render().el);
               },
+
               addAll: function(){
-                this.$('#todo-list').html(''); // clean the todo list
+                this.$('#todo-list').html('');
                 app.todoList.each(this.addOne, this);
               },
+
               newAttributes: function(){
                 return {
                   title: this.input.val().trim(),
@@ -127,4 +133,3 @@
 
         </body>
         </html>
-
